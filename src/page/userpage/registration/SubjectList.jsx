@@ -76,6 +76,12 @@ export default function SubjectList(){
     const [subjectList, setSubjectList] = useState([]);
     //Thông báo  
     const [notify,setNotify] = useState({ open:false, message:"", type:""});
+    //Thiết lập form
+    const{
+        data, error,validate, handleInputChange
+    } =  useForm(initialData,validateData);
+    //Dữ liệu của bảng
+    const [listData, setlistData] = useState(subjectList);
     //Cập nhật dữ liệu
     useEffect(()=>{
         SubjectApi.getAllSubject(id).then(resp=>{
@@ -93,13 +99,8 @@ export default function SubjectList(){
             setSubjectList([]);
             setlistData([]);
         }
-    },[id,state.update,dispatch]);
-    //Thiết lập form
-    const{
-        data, error,validate, handleInputChange
-    } =  useForm(initialData,validateData);
-    //Dữ liệu của bảng
-    const [listData, setlistData] = useState(subjectList);
+    },[id,dispatch]);
+    
     //Xử lý khi chọn nút
     const handleSelect = item=>{
         dispatch(setSubject(item.id));
@@ -168,7 +169,10 @@ export default function SubjectList(){
                                          variant="body2"
                                          className={classes.typography}
                                     >
-                                        {"Số nhóm đã đăng kí: "+item.numberOfRegister}
+                                        {"Số nhóm đã đăng kí: "+
+                                            (item.id===state.subjectId?
+                                                state.checked:item.numberOfRegister)
+                                        }
                                     </Typography>
                                 </AccordionDetails>
                                 <AccordionActions>

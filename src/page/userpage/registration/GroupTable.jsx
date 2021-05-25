@@ -15,7 +15,7 @@ import CustomSelect from "../../component/CustomSelect";
 import { useDispatch, useSelector } from "react-redux";
 import CustomBackDrop from "../../component/CustomBackDrop";
 import CustomNotification from "../../component/CustomNotification";
-import {setUpdate} from "../../../app/slice/RegistrationSlice";
+import {setChecked} from "../../../app/slice/RegistrationSlice";
 var _=require("lodash");
 
 const useStyles=makeStyles((theme)=>({
@@ -110,17 +110,15 @@ export default function GroupTable(){
     }= useTable(record,headerCells,filter);
     //Thiết lập dữ liệu ban đầu
     useEffect(()=>{
-        GroupApi.getBySubject(state.subjectId).then(resp=>{
-            const data = resp.data.map(item=>{
-                item.groupInfo=_.sortBy(item.groupInfo,["shift"]);
-                return item;
-            })
-            setRecord(data);
+        GroupApi.getBySubject(state.subjectId)
+        .then(resp=>{
+            setRecord(resp.data);
         }); 
-        GroupApi.getAllCheckedItem({id:state.subjectId}).then(resp=>{
+        GroupApi.getAllCheckedItem({id:state.subjectId})
+        .then(resp=>{
             setCheckedItem(resp.filter(item=>item.teacherId===state.teacherId));
             setOtherCheckedItem(resp.filter(item=>item.teacherId!==state.teacherId));
-        })
+        }); 
         setdataInput({ input:"", type:0});
         setFilter({
              filting:items=>{
@@ -138,6 +136,11 @@ export default function GroupTable(){
             setPageNumber(0);
          }
     },[state.subjectId,state.teacherId,setPageNumber]);
+    const dispatch= useDispatch();
+    //Cập nhật khi danh sách đăng kí thay đổi
+    useEffect(()=>{
+        dispatch(setChecked(checkedItem.length));
+    },[checkedItem.length,dispatch]);
     //Thông báo  
     const [notify,setNotify] = useState({ open:false, message:"", type:""});
     //mở chế độ chờ
@@ -175,30 +178,26 @@ export default function GroupTable(){
            ...dataInput,
            [name]:value
         });
-    }
-    const dispatch= useDispatch();
+    };
     //reset khi đăng kí
     const reset = ()=>{
-        dispatch(setUpdate(!state.update));
-        GroupApi.getBySubject(state.subjectId).then(resp=>{
-            const data = resp.data.map(item=>{
-                item.groupInfo=_.sortBy(item.groupInfo,["shift"]);
-                return item;
-            })
-            setRecord(data);
+        GroupApi.getBySubject(state.subjectId)
+        .then(resp=>{
+            setRecord(resp.data);
         }); 
-        GroupApi.getAllCheckedItem({id:state.subjectId}).then(resp=>{
+        GroupApi.getAllCheckedItem({id:state.subjectId})
+        .then(resp=>{
             setCheckedItem(resp.filter(item=>item.teacherId===state.teacherId));
             setOtherCheckedItem(resp.filter(item=>item.teacherId!==state.teacherId));
-        }) 
-    }
+        }); 
+    };
     //Xử lý khi ấn checkbox
     const handleCheck = e=>{
         const {value} = e.target;
         const data={
             teacherId:state.teacherId,
             subjectGroupId:JSON.parse(value).id
-        }
+        };
         setOpenBackDrop(true);
         GroupApi.doRegister(data).then(resp=>{
             reset();
@@ -207,7 +206,7 @@ export default function GroupTable(){
                 open:true,
                 message:resp.data,
                 type:"success"
-            })
+            });
         }).catch(err=>{
             reset();
             setOpenBackDrop(false);
@@ -215,10 +214,9 @@ export default function GroupTable(){
                 open:true,
                 message:err.response.data,
                 type:"error"
-            })
-        })
-    }
-
+            });
+        });
+    };
     //Kiểm tra xem có bị disble không
     //Disable khi hết slot nhưng giảng viên được chọn chưa đăng kí
     //Disable khi đăng kí đủ số nhóm nhưng ô đó chưa được giảng viên chọn

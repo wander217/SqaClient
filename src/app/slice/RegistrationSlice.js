@@ -5,7 +5,7 @@ const initialState = {
     teacherId:0,
     subjectId:0,
     sumGroup:0,
-    update:false
+    checked:0
 }
 
 //Slice của đăng kí
@@ -35,14 +35,14 @@ const RegSlice=createSlice({
             }
         },
         //Cài tổng số nhóm đã đăng kí
-        setUpdate:(state,data)=>{
+        setChecked:(state,data)=>{
             return{
                 ...state,
-                update:data.payload,
+                checked:data.payload,
             }
         },
     }
 });
 
-export const { setSubject,setTeacher,setSumGroup,setUpdate} = RegSlice.actions; 
+export const { setSubject,setTeacher,setSumGroup,setChecked} = RegSlice.actions; 
 export default RegSlice.reducer;
